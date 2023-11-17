@@ -6,6 +6,7 @@ import path from "path";
 import React, { ElementRef, useEffect, useRef, useState } from "react";
 
 import { useMediaQuery } from "usehooks-ts";
+import UserItem from "./user-item";
 
 const Navigation = () => {
   const pathname = usePathname();
@@ -27,9 +28,9 @@ const Navigation = () => {
 
   useEffect(() => {
     if (isMobile) {
-      collapse()
+      collapse();
     }
-  }, [pathname, isMobile])
+  }, [pathname, isMobile]);
 
   const handleMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -105,7 +106,6 @@ const Navigation = () => {
           isMobile && "w-0"
         )}
       >
-        Navigation
         <div
           onClick={collapse}
           role="button"
@@ -117,7 +117,7 @@ const Navigation = () => {
           <ChevronLeft className="h-6 w-6" />
         </div>
         <div>
-          <p>Action Items</p>
+          <UserItem />
         </div>
         <div className="mt-4">
           <p> Documents</p>
