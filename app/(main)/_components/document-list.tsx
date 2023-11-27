@@ -61,7 +61,7 @@ const DocumentList = ({ parentDocumentId, level = 0 }: DocumentListProps) => {
         No Pages Inside
       </p>
       {documents.map((document) => (
-        <div>
+        <div key={document._id}>
           <Item
             id={document._id}
             onClick={() => onRedirect(document._id)}
