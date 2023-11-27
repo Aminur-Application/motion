@@ -7,22 +7,24 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import { Doc, Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/clerk-react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import {
   ChevronDown,
   ChevronRight,
+  FolderEdit,
   LucideIcon,
   MoreHorizontal,
   Plus,
   Trash,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface ItemProps {
@@ -55,6 +57,38 @@ const Item = ({
   const create = useMutation(api.documents.create);
   const archive = useMutation(api.documents.archive);
   const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(label || "Untitled");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const update = useMutation(api.documents.update);
+
+  const enableInput = () => {
+    setTitle(label);
+    setIsEditing(true);
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange(0, inputRef.current.value.length);
+    }, 0);
+  };
+
+  const disableInput = () => {
+    setIsEditing(false);
+  };
+
+  const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(event.target.value);
+    update({
+      id: id!,
+      title: event.target.value || "Untitled",
+    });
+  };
+
+  const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      setIsEditing(false);
+      console.log("documents", document, "title", title);
+    }
+  };
 
   const handleExpand = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -71,7 +105,7 @@ const Item = ({
         if (!expanded) {
           onExpand?.();
         }
-        // router.push(`/documents/${documentId}`);
+        router.push(`/documents/${documentId}`);
       }
     );
     toast.promise(promise, {
@@ -117,8 +151,22 @@ const Item = ({
       ) : (
         <Icon className="shrink-0 h-[18px] mr-2 text-muted-foreground" />
       )}
+      {isEditing ? (
+        <Input
+          ref={inputRef}
+          onClick={enableInput}
+          onBlur={disableInput}
+          onChange={onChange}
+          onKeyDown={onKeyDown}
+          value={title}
+          className="h-7 mr-1 px-2 focus-visible:ring-transparent"
+        />
+      ) : (
+        <span className="truncate" onDoubleClick={enableInput}>
+          {label}
+        </span>
+      )}
 
-      <span className="truncate">{label}</span>
       {isSearch && (
         <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.4 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
           <span className="text-xs">Cmd + K</span>
@@ -143,6 +191,9 @@ const Item = ({
             >
               <DropdownMenuItem onClick={onArchive}>
                 <Trash className="h-4 w-4 mr-2" /> Delete
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => enableInput()}>
+                <FolderEdit className="h-4 w-4 mr-2" /> Rename
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <div className="text-sm text-muted-foreground p-2">
