@@ -9,7 +9,7 @@ import {
   Settings,
   Trash,
 } from "lucide-react";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import path from "path";
 import React, { ElementRef, useEffect, useRef, useState } from "react";
 
@@ -40,6 +40,7 @@ const Navigation = () => {
   const create = useMutation(api.documents.create);
   const search = useSearch();
   const settings = useSettings();
+  const router = useRouter();
 
   const [isResetting, setIsResetting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
@@ -125,7 +126,7 @@ const Navigation = () => {
   const handleCreate = () => {
     const promise = create({
       title: "Untitled",
-    });
+    }).then((documentId) => router.push(`/documents/${documentId}`));
 
     toast.promise(promise, {
       loading: "Creating a new note..",
