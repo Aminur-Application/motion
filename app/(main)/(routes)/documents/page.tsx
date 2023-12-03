@@ -47,7 +47,7 @@ const DocumentsPage = () => {
       />
 
       <h2 className="text-lg font-medium">
-        Welcome to {user?.firstName}'s Motion
+        Welcome to {user?.firstName}s Motion
       </h2>
 
       <Button onClick={onCreate}>
